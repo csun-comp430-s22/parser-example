@@ -4,6 +4,7 @@ i is an integer
 op ::= + | - | < | ==
 exp ::= x | i | exp op exp
 stmt ::= if (exp) stmt else stmt | { stmt* } // statements are separated with ;
+program ::= stmt
 ```
 
 Tokens:
