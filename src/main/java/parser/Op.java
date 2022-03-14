@@ -1,3 +1,3 @@
 package parser;
 
-public interface Op implements Node {}
+public interface Op extends Node {}

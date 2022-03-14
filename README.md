@@ -17,7 +17,7 @@ Tokens:
 - VariableToken(name)
 - IntegerToken(integer_value)
 - LeftParenToken
-- RghtParenToken
+- RightParenToken
 - LeftCurlyToken
 - RightCurlyToken
 - SemicolonToken

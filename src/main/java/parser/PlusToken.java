@@ -1,15 +1,15 @@
 package parser;
 
-public class EqualsOp implements Op {
+public class PlusToken implements Token {
     public boolean equals(final Object other) {
-        return other instanceof EqualsOp;
+        return other instanceof PlusToken;
     }
 
     public int hashCode() {
-        return 3;
+        return 0;
     }
-
+    
     public String toString() {
-        return "EqualsOp";
+        return "PlusToken";
     }
 }

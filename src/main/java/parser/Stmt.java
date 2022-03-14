@@ -1,3 +1,3 @@
 package parser;
 
-public interface Stmt implements Node {}
+public interface Stmt extends Node {}

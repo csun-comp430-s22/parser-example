@@ -1,3 +1,3 @@
 package parser;
 
-public interface Exp implements Node {}
+public interface Exp extends Node {}
