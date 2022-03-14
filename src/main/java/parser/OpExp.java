@@ -2,6 +2,7 @@ package parser;
 
 // 1 + 3
 // new OpExp(new IntegerExp(1), new PlusOp(), new IntegerExp(3))
+// toString result: "OpExp(Integer(1), PlusOp, IntegerExp(3))"
 //
 // 2 - (1 + 3)
 // new OpExp(new IntegerExp(2),
