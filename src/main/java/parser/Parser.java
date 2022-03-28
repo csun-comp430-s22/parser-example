@@ -77,14 +77,12 @@ public class Parser {
 
     // recursive descent parsing can't handle a grammar with left-recursion
     // exp ::= x | i | exp op exp
+    //                  ^      ^
+    //                  |      |
+    //                 left    |
+    //                       right
     public ParseResult<Exp> parseExp(final int position) throws ParseException {
         final Token token = getToken(position);
-        // with pattern matching (in Scala)
-        // getToken(position) match {
-        //   case VariableToken(name) => ParseResult(VariableExp(name), position + 1)
-        //   case IntegerToken(value) => ParseResult(IntegerExp(value), position + 1)
-        //   ...
-        // }
         if (token instanceof VariableToken) {
             final String name = ((VariableToken)token).name;
             return new ParseResult<Exp>(new VariableExp(name), position + 1);
