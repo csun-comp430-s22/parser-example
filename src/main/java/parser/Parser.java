@@ -50,10 +50,18 @@ public class Parser {
         }
     }
 
+    // public ParseResult<Stmt> parseStmt(final int position) throws ParseException { ... }
+    
     // parser for op
     // op ::= + | - | < | ==
     public ParseResult<Op> parseOp(final int position) throws ParseException {
         final Token token = getToken(position);
+        // with pattern matching (in Scala)
+        // token match {
+        //   case PlusToken => ParseResult(PlusOp(), position + 1)
+        //   case MinusToken => ParseResult(MinusOp(), position + 1)
+        //   ...
+        // }
         if (token instanceof PlusToken) {
             return new ParseResult<Op>(new PlusOp(), position + 1);
         } else if (token instanceof MinusToken) {
@@ -66,4 +74,35 @@ public class Parser {
             throw new ParseException("expected operator; received: " + token);
         }
     }
+
+    // recursive descent parsing can't handle a grammar with left-recursion
+    // exp ::= x | i | exp op exp
+    public ParseResult<Exp> parseExp(final int position) throws ParseException {
+        final Token token = getToken(position);
+        // with pattern matching (in Scala)
+        // getToken(position) match {
+        //   case VariableToken(name) => ParseResult(VariableExp(name), position + 1)
+        //   case IntegerToken(value) => ParseResult(IntegerExp(value), position + 1)
+        //   ...
+        // }
+        if (token instanceof VariableToken) {
+            final String name = ((VariableToken)token).name;
+            return new ParseResult<Exp>(new VariableExp(name), position + 1);
+        } else if (token instanceof IntegerToken) {
+            final int value = ((IntegerToken)token).value;
+            return new ParseResult<Exp>(new IntegerExp(value), position + 1);
+        } else {
+            // Issue #1: operator precedence
+            // Issue #2: ??? - hint: this is recursive code
+            // Have base cases, have a recursive case.
+            final ParseResult<Exp> left = parseExp(position);
+            final ParseResult<Op> op = parseOp(left.position);
+            final ParseResult<Exp> right = parseExp(op.position);
+            return new ParseResult<Exp>(new OpExp(left.result,
+                                                  op.result,
+                                                  right.result),
+                                        right.position);
+        }
+    }
+            
 }
