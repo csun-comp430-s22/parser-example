@@ -19,7 +19,7 @@ additive_exp ::= primary_exp (additive_op primary_exp)*
 less_than_exp ::= additive_exp (`<` additive_exp)*
 equals_exp ::= less_than_exp (`==` less_than_exp)*
 exp ::= equals_exp
-stmt ::= if (exp) stmt else stmt | { stmt* } | println(exp) // statements are separated with ;
+stmt ::= if (exp) stmt else stmt | { stmt* } | println(exp);
 program ::= stmt
 ```
 
