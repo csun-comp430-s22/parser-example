@@ -72,6 +72,8 @@ public class Parser {
             assertTokenHereIs(inParens.position, new RightParenToken());
             return new ParseResult<Exp>(inParens.result,
                                         inParens.position + 1);
+        } else {
+            throw new ParseException("Expected primary expression; received: " + token);
         }
     } // parsePrimaryExp
 
@@ -111,6 +113,53 @@ public class Parser {
         return current;
     } // parseAdditiveExp
 
+    // less_than_exp ::= additive_exp (`<` additive_exp)*
+    public ParseResult<Exp> parseLessThanExp(final int position) throws ParseException {
+        ParseResult<Exp> current = parseAdditiveExp(position);
+        boolean shouldRun = true;
+        
+        while (shouldRun) {
+            try {
+                assertTokenHereIs(current.position, new LessThanToken());
+                final ParseResult<Exp> other = parseAdditiveExp(current.position + 1);
+                current = new ParseResult<Exp>(new OpExp(current.result,
+                                                         new LessThanOp(),
+                                                         other.result),
+                                               other.position);
+            } catch (final ParseException e) {
+                shouldRun = false;
+            }
+        }
+
+        return current;
+    } // parseLessThanExp
+
+    // equals_exp ::= less_than_exp (`==` less_than_exp)*
+    public ParseResult<Exp> parseEqualsExp(final int position) throws ParseException {
+        ParseResult<Exp> current = parseLessThanExp(position);
+        boolean shouldRun = true;
+
+        while (shouldRun) {
+            try {
+                assertTokenHereIs(current.position, new EqualsToken());
+                final ParseResult<Exp> other = parseLessThanExp(current.position + 1);
+                current = new ParseResult<Exp>(new OpExp(current.result,
+                                                         new EqualsOp(),
+                                                         other.result),
+                                               other.position);
+            } catch (final ParseException e) {
+                shouldRun = false;
+            }
+        }
+
+        return current;
+    } // parseEqualsExp
+
+    // exp ::= equals_exp
+    public ParseResult<Exp> parseExp(final int position) throws ParseException {
+        return parseEqualsExp(position);
+    }
+                                                         
     // stmt ::= if (exp) stmt else stmt | { stmt* } | println(exp);
     public ParseResult<Stmt> parseStmt(final int position) throws ParseException {
         final Token token = getToken(position);
@@ -122,9 +171,9 @@ public class Parser {
             final ParseResult<Stmt> trueBranch = parseStmt(guard.position + 1);
             assertTokenHereIs(trueBranch.position, new ElseToken());
             final ParseResult<Stmt> falseBranch = parseStmt(trueBranch.position + 1);
-            return new ParseResult<Stmt>(new IfExp(guard.result,
-                                                   trueBranch.result,
-                                                   falseBranch.result),
+            return new ParseResult<Stmt>(new IfStmt(guard.result,
+                                                    trueBranch.result,
+                                                    falseBranch.result),
                                          falseBranch.position);
         } else if (token instanceof LeftCurlyToken) {
             final List<Stmt> stmts = new ArrayList<Stmt>();
@@ -152,57 +201,24 @@ public class Parser {
             throw new ParseException("expected statement; received: " + token);
         }
     } // parseStmt
-    
-    /*
-    // parser for op
-    // op ::= + | - | < | ==
-    public ParseResult<Op> parseOp(final int position) throws ParseException {
-        final Token token = getToken(position);
-        // with pattern matching (in Scala)
-        // token match {
-        //   case PlusToken => ParseResult(PlusOp(), position + 1)
-        //   case MinusToken => ParseResult(MinusOp(), position + 1)
-        //   ...
-        // }
-        if (token instanceof PlusToken) {
-            return new ParseResult<Op>(new PlusOp(), position + 1);
-        } else if (token instanceof MinusToken) {
-            return new ParseResult<Op>(new MinusOp(), position + 1);
-        } else if (token instanceof LessThanToken) {
-            return new ParseResult<Op>(new LessThanOp(), position + 1);
-        } else if (token instanceof EqualsToken) {
-            return new ParseResult<Op>(new EqualsOp(), position + 1);
-        } else {
-            throw new ParseException("expected operator; received: " + token);
-        }
-    }
 
-    // recursive descent parsing can't handle a grammar with left-recursion
-    // exp ::= x | i | exp op exp
-    //                  ^      ^
-    //                  |      |
-    //                 left    |
-    //                       right
-    public ParseResult<Exp> parseExp(final int position) throws ParseException {
-        final Token token = getToken(position);
-        if (token instanceof VariableToken) {
-            final String name = ((VariableToken)token).name;
-            return new ParseResult<Exp>(new VariableExp(name), position + 1);
-        } else if (token instanceof IntegerToken) {
-            final int value = ((IntegerToken)token).value;
-            return new ParseResult<Exp>(new IntegerExp(value), position + 1);
+    // program ::= stmt
+    public ParseResult<Program> parseProgram(final int position) throws ParseException {
+        final ParseResult<Stmt> stmt = parseStmt(position);
+        return new ParseResult<Program>(new Program(stmt.result),
+                                        stmt.position);
+    } // parseProgram
+
+    // intended to be called on the top-level
+    public Program parseProgram() throws ParseException {
+        final ParseResult<Program> program = parseProgram(0);
+        // make sure all tokens were read in
+        // if any tokens remain, then there is something extra at the end
+        // of the program, which should be a syntax error
+        if (program.position == tokens.size()) {
+            return program.result;
         } else {
-            // Issue #1: operator precedence
-            // Issue #2: ??? - hint: this is recursive code
-            // Have base cases, have a recursive case.
-            final ParseResult<Exp> left = parseExp(position);
-            final ParseResult<Op> op = parseOp(left.position);
-            final ParseResult<Exp> right = parseExp(op.position);
-            return new ParseResult<Exp>(new OpExp(left.result,
-                                                  op.result,
-                                                  right.result),
-                                        right.position);
+            throw new ParseException("Remaining tokens at end");
         }
-    }
-    */
+    } // parseProgram
 }
