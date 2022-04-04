@@ -4,7 +4,7 @@ Original grammar.  Left-recursive, no operator precedence:
 x is a variable
 i is an integer
 op ::= + | - | < | ==
-exp ::= x | i | exp op exp
+exp ::= x | i | exp op exp | exp.methodname(exp*)
 stmt ::= if (exp) stmt else stmt | { stmt* } // statements are separated with ;
 program ::= stmt
 ```
@@ -13,13 +13,14 @@ New grammar.  No longer left-recursive, and handles operator precedence:
 ```
 x is a variable
 i is an integer
-primary_exp ::= x | i | `(` exp `)`
+primary_exp ::= x | i | `(` exp `)` | x.methodname(exp*)
 additive_op ::= + | -
 additive_exp ::= primary_exp (additive_op primary_exp)*
-less_than_exp ::= additive_exp (`<` additive_exp)*
+dot_exp ::= additive_exp (`.` additive_exp)*
+less_than_exp ::= dot_exp (`<` dot_exp)*
 equals_exp ::= less_than_exp (`==` less_than_exp)*
 exp ::= equals_exp
-stmt ::= if (exp) stmt else stmt | { stmt* } | println(exp);
+stmt ::= if (exp) stmt else stmt | { stmt* } | println(exp); | while (exp) stmt 
 program ::= stmt
 ```
 
