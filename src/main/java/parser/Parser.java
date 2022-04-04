@@ -63,7 +63,8 @@ public class Parser {
         final Token token = getToken(position);
         if (token instanceof VariableToken) {
             final String name = ((VariableToken)token).name;
-            return new ParseResult<Exp>(new VariableExp(name), position + 1);
+            return new ParseResult<Exp>(new VariableExp(new Variable(name)),
+                                        position + 1);
         } else if (token instanceof IntegerToken) {
             final int value = ((IntegerToken)token).value;
             return new ParseResult<Exp>(new IntegerExp(value), position + 1);

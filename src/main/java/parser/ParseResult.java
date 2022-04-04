@@ -10,26 +10,22 @@ public class ParseResult<A> {
         this.result = result;
         this.position = position;
     }
+
+    public int hashCode() {
+        return result.hashCode() + position;
+    }
+
+    public boolean equals(final Object other) {
+        if (other instanceof ParseResult) {
+            final ParseResult<A> otherResult = (ParseResult<A>)other;
+            return (result.equals(otherResult.result) &&
+                    position == otherResult.position);
+        } else {
+            return false;
+        }
+    }
+
+    public String toString() {
+        return "ParseResult(" + result.toString() + ", " + position + ")";
+    }
 }
-
-// public class ExpParseResult {
-//     public final Exp result;
-//     public final int position;
-
-//     public ExpParseResult(final Exp result,
-//                           final int position) {
-//         this.result = result;
-//         this.position = position;
-//     }
-// }
-
-// public class StmtParseResult {
-//     public final Stmt result;
-//     public final int position;
-
-//     public StmtParseResult(final Stmt result,
-//                            final int position) {
-//         this.result = result;
-//         this.position = position;
-//     }
-// }
