@@ -1,11 +1,21 @@
 Original grammar.  Left-recursive, no operator precedence:
 
 ```
+Variable.java
 x is a variable
+
 i is an integer
-op ::= + | - | < | ==
-exp ::= x | i | exp op exp
-stmt ::= if (exp) stmt else stmt | { stmt* } // statements are separated with ;
+
+Op.java       PlusOp.java   MinusOp.java  LessThanOp.java      EqualsOp.java
+op ::=        + |           - |           < |                  ==
+
+Exp.java   VariableExp.java    IntegerExp.java   OpExp.java
+exp ::=    x |                 i |               exp op exp
+
+Stmt.java   IfStmt.java               BlockStmt.java
+stmt ::=    if (exp) stmt else stmt | { stmt* } // statements are separated with ;
+
+Program.java
 program ::= stmt
 ```
 
